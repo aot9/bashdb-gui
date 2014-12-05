@@ -24,7 +24,7 @@ class BashDb():
         if self.prevCmd:
             text = text[1:]
         for line in text:
-            matchObj = re.match(r'\s?\((.*\.sh):(\d)+\):', line)
+            matchObj = re.match(r'\s?\((.*\.sh):(\d+)\):', line)
             if matchObj:
                 self.curSourceFile = matchObj.group(1)
                 self.curCodeLine = int(matchObj.group(2))
@@ -53,6 +53,9 @@ class BashDb():
     def step(self):
         self.__cmd('step')
 
+    def next(self):
+        self.__cmd('next')
+
     def run(self):
         self.__cmd('cont')
 
@@ -67,7 +70,9 @@ if __name__ == '__main__':
     db.step()
     db.step()
     db.step()
-    db.restart()
+   # db.restart()
+    db.step()
+    db.step()
     db.step()
     db.step()
     #db.quit()

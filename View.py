@@ -3,6 +3,7 @@
 from Tkinter import *
 import tkFont
 import ttk
+from SourceCodeBox import SourceCodeBox
 
 class View(Tk):
     def __init__(self, Bl):
@@ -18,7 +19,7 @@ class View(Tk):
         self.ButtonFrame.pack(side = TOP, fill = X, expand = 0)
 
         Button(self.ButtonFrame, text = "Step Into",    command = self.step_cb   ).pack(side = LEFT, fill = X, expand = 1)
-        Button(self.ButtonFrame, text = "Step Over",    command = self.step_cb   ).pack(side = LEFT, fill = X, expand = 1)
+        Button(self.ButtonFrame, text = "Step Over",    command = self.next_cb   ).pack(side = LEFT, fill = X, expand = 1)
         Button(self.ButtonFrame, text = "Go",     command = self.run_cb    ).pack(side = LEFT, fill = X, expand = 1)
         Button(self.ButtonFrame, text = "Restart", command = self.restart_cb).pack(side = LEFT, fill = X, expand = 1)
         Button(self.ButtonFrame, text = "Quit",    command = self.quit_cb   ).pack(side = LEFT, fill = X, expand = 1)
@@ -29,7 +30,7 @@ class View(Tk):
         self.tabView = ttk.Notebook(self.pw) 
         self.pw.add(self.tabView)
         
-        self.sourceCodeBox = Listbox(self.pw, font = self.Font, selectmode = BROWSE)
+        self.sourceCodeBox = SourceCodeBox(self.pw)
         self.tabView.add(self.sourceCodeBox, text = self.Bl.getCurSrcFile())
 
         self.fillSourceCodeBox()
@@ -43,6 +44,7 @@ class View(Tk):
             func()
         
         self.outputBox.insert(END, self.Bl.getAppOutput())
+        self.sourceCodeBox.moveLinePtr(self.Bl.getCurCodeLine())
 
     def step_cb(self):
         self.__cmd_cb(self.Bl.step)
@@ -52,13 +54,19 @@ class View(Tk):
 
     def restart_cb(self):
         self.__cmd_cb(self.Bl.restart)
+    
+    def next_cb(self):
+        self.__cmd_cb(self.Bl.next)
 
     def quit_cb(self):
         self.__cmd_cb(self.Bl.quit)
 
     def fillSourceCodeBox(self):
+        i = 1
         for line in self.Bl.readSourceCode():
-            self.sourceCodeBox.insert(END, "    " + line)
+            strnum = str(i)
+            self.sourceCodeBox.insertLine(strnum + (" "*(5-len(strnum))) + line.strip())
+            i = i + 1
 
 if __name__ == '__main__':
     view = View(None)
