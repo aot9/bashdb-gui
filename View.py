@@ -9,6 +9,7 @@ class View(Tk):
     def __init__(self, Bl):
         Tk.__init__(self)
         
+        self.title("bashdb-gui")
         self.cur_line = None
         
         self.Bl = Bl
@@ -22,7 +23,6 @@ class View(Tk):
         Button(self.ButtonFrame, text = "Step Over",    command = self.next_cb   ).pack(side = LEFT, fill = X, expand = 1)
         Button(self.ButtonFrame, text = "Go",     command = self.run_cb    ).pack(side = LEFT, fill = X, expand = 1)
         Button(self.ButtonFrame, text = "Restart", command = self.restart_cb).pack(side = LEFT, fill = X, expand = 1)
-        Button(self.ButtonFrame, text = "Quit",    command = self.quit_cb   ).pack(side = LEFT, fill = X, expand = 1)
 
         self.pw = PanedWindow(self, orient = VERTICAL)
         self.pw.pack(side = TOP, fill = BOTH, expand = 1)
@@ -35,7 +35,7 @@ class View(Tk):
 
         self.fillSourceCodeBox()
 
-        self.outputBox = Text(self.pw, font = self.Font)
+        self.outputBox = Text(self.pw)
         self.pw.add(self.outputBox)
         self.__cmd_cb(None)
     
