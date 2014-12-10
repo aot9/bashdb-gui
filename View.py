@@ -30,15 +30,17 @@ class View(Tk):
         self.pw = PanedWindow(self, orient = VERTICAL)
         self.pw.pack(side = TOP, fill = BOTH, expand = 1)
 
-        self.tabView = ttk.Notebook(self.pw) 
-        self.pw.add(self.tabView)
+        self.tabFrame = LabelFrame(self.pw, text = "Listing", padx = 5, pady = 5)
+        self.tabView = ttk.Notebook(self.tabFrame)
+        self.tabView.pack(fill = BOTH, expand = 1)
+        self.pw.add(self.tabFrame)
         
         self.hpw = PanedWindow(self.pw, orient = HORIZONTAL)
         self.pw.add(self.hpw)
 
         self.outputFrame = LabelFrame(self.hpw, text = "Stdout", padx = 5, pady = 5)
         self.outputBox = Text(self.outputFrame)
-        self.outputBox.pack()
+        self.outputBox.pack(fill = BOTH,expand = 1)
         
         self.dataFrame = LabelFrame(self.hpw, text = "Watch List", padx = 5, pady = 5)
         self.dataBtnFrame = Frame(self.dataFrame)

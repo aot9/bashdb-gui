@@ -7,12 +7,13 @@ class BashDb():
     def __init__(self, scriptname):
     
         self.appOut = None
-        self.curSourceFile = scriptname
         self.curCodeLine = None
         self.prevCmd = None
         
         self.breakList = {}
         self.watchList = {}
+        
+        self.curSourceFile = scriptname
 
         self.child = pexpect.spawn('bashdb -q ' + scriptname)
         self.child.expect('bashdb<.*>')
@@ -98,9 +99,6 @@ class BashDb():
     def run(self):
         self.__cmd('cont')
 
-    def quit(self):
-        self.__cmd('q')
-    
     def restart(self):
         self.__cmd('R')
     
