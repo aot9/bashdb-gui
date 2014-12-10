@@ -6,5 +6,5 @@ import sys
 
 db   = BashDb(sys.argv[1])
 view = View(db)
-view.geometry('640x480')
+view.geometry('800x600')
 view.mainloop()

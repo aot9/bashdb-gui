@@ -10,10 +10,12 @@ class View(Tk):
         Tk.__init__(self)
         
         self.title("bashdb-gui")
+        
         self.cur_line = None
+        self.curSrcFile = None
+        
         self.Bl = Bl
-        self.curSrcFile = self.Bl.getCurSrcFile()
-
+         
         self.Font = tkFont.Font(family = "Monospace", size = 12)        
 
         self.ButtonFrame = Frame(self)
@@ -24,40 +26,33 @@ class View(Tk):
         Button(self.ButtonFrame, text = "Step Over", command = lambda : self.__cmd_cb(self.Bl.next)   ).pack(btnPackOpt)
         Button(self.ButtonFrame, text = "Go",        command = lambda : self.__cmd_cb(self.Bl.run)    ).pack(btnPackOpt)
         Button(self.ButtonFrame, text = "Restart",   command = lambda : self.__cmd_cb(self.Bl.restart)).pack(btnPackOpt)
-
+        
         self.pw = PanedWindow(self, orient = VERTICAL)
         self.pw.pack(side = TOP, fill = BOTH, expand = 1)
 
         self.tabView = ttk.Notebook(self.pw) 
         self.pw.add(self.tabView)
         
-        self.sourceCodeBox = SourceCodeBox(self.tabView)
-        self.sourceCodeBox.setFont(self.Font)
-        self.sourceCodeBox.setBrCb(self.Bl.br)
-
-        self.tabView.add(self.sourceCodeBox, text = self.curSrcFile)
-    
-        self.fillSourceCodeBox()
-        
-        self.hpw = PanedWindow(self, orient = HORIZONTAL)
-        
+        self.hpw = PanedWindow(self.pw, orient = HORIZONTAL)
         self.pw.add(self.hpw)
 
-        self.outputBox = Text(self.hpw, font = self.Font)
+        self.outputFrame = LabelFrame(self.hpw, text = "Stdout", padx = 5, pady = 5)
+        self.outputBox = Text(self.outputFrame)
+        self.outputBox.pack()
         
-        self.dataFrame = Frame(self.hpw)
+        self.dataFrame = LabelFrame(self.hpw, text = "Watch List", padx = 5, pady = 5)
         self.dataBtnFrame = Frame(self.dataFrame)
         self.dataBtnFrame.pack(side = TOP, fill = X)
-        self.dataEntry = Entry (self.dataBtnFrame)
-        self.dataEntry.pack(side = LEFT, fill = X, expand = 1)
         self.addVarBtn = Button(self.dataBtnFrame,  text = "Add", command = lambda : self.__dataEntry_cb(self.Bl.addVarToWatch))
         self.addVarBtn.pack(side = LEFT, fill = X)
-        self.remVarBtn = Button(self.dataBtnFrame,  text = "Remove", command = lambda : self.__dataEntry_cb(self.Bl.remVarFromWatch))
+        self.remVarBtn = Button(self.dataBtnFrame,  text = "Del", command = lambda : self.__dataEntry_cb(self.Bl.remVarFromWatch))
         self.remVarBtn.pack(side = LEFT, fill = X)
+        self.dataEntry = Entry (self.dataBtnFrame)
+        self.dataEntry.pack(side = LEFT, fill = X, expand = 1)
         self.dataBox = Text(self.dataFrame)
         self.dataBox.pack(side = BOTTOM, fill = BOTH, expand = 1)
         
-        self.hpw.add(self.outputBox)
+        self.hpw.add(self.outputFrame)
         self.hpw.add(self.dataFrame)
         
         self.__cmd_cb(None)
@@ -71,25 +66,42 @@ class View(Tk):
         if func:
             func()
         
+        if self.curSrcFile != self.Bl.getCurSrcFile():
+            if self.curSrcFile != None:
+                self.getActiveTab().selectionClear()
+            self.curSrcFile = self.Bl.getCurSrcFile() 
+            for tab_id in self.tabView.tabs():
+                if self.tabView.tab(tab_id)["text"] == self.curSrcFile:
+                    self.tabView.select(tab_id)
+                    break
+            else:    
+                self.addNewTab()
+       
         self.outputBox.insert(END, self.Bl.getAppOutput())
-        self.sourceCodeBox.moveLinePtr(self.Bl.getCurCodeLine())
+        self.getActiveTab().moveLinePtr(self.Bl.getCurCodeLine())
         self.updateDataBox()
+    
+    def getActiveTab(self):
+        return self.tabView.__dict__['children'][self.tabView.select().rsplit('.', 1)[1]]
 
-        #self.updateCurSrcFile()
-
-#    def updateCurSrcFile(self):
+    def addNewTab(self):
+        sourceCodeBox = SourceCodeBox(self.tabView)
+        sourceCodeBox.setFont(self.Font)
+        sourceCodeBox.setBrCb(self.Bl.br)
         
+        self.tabView.add(sourceCodeBox, text = self.curSrcFile)
+        self.tabView.select(self.tabView.tabs()[-1])
+        self.fillSourceCodeBox(sourceCodeBox)
 
     def updateDataBox(self):
         self.dataBox.delete(1.0, END)
         for line in self.Bl.getWatchList():
             self.dataBox.insert(END, line + '\n')
 
-    def fillSourceCodeBox(self):
-        i = 1
-        for line in  self.Bl.readSourceCode():
-            self.sourceCodeBox.insertLine(" " + str(i) + " "*(6-len(str(i))) + line.strip())
-            i = i + 1
+    def fillSourceCodeBox(self, codeBox):
+        srcCode = self.Bl.readSourceCode() 
+        for n, line in zip(xrange(1, len(srcCode) + 1), srcCode):
+            codeBox.insertLine(" " + str(n) + " "*(6-len(str(n))) + line.strip())
 
 if __name__ == '__main__':
     view = View(None)

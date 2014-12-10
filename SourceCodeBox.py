@@ -48,6 +48,10 @@ class SourceCodeBox(Frame):
         self.code.selection_clear(self.prev_pos, None)
         self.code.selection_set(pos - 1, None)
         self.prev_pos = pos - 1
+    
+    def selectionClear(self):
+        self.code.selection_clear(0, END)
+        self.brPtr.selection_clear(0, END)
 
     def insertLine(self, line):
         self.code.insert(END, line)

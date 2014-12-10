@@ -7,15 +7,14 @@ class BashDb():
     def __init__(self, scriptname):
     
         self.appOut = None
-        self.curSourceFile = None
+        self.curSourceFile = scriptname
         self.curCodeLine = None
         self.prevCmd = None
         
         self.breakList = {}
         self.watchList = {}
 
-        self.script = scriptname
-        self.child = pexpect.spawn('bashdb -q ' + self.script)
+        self.child = pexpect.spawn('bashdb -q ' + scriptname)
         self.child.expect('bashdb<.*>')
 
         self.__parseOutput(self.__getOutput())
@@ -44,7 +43,7 @@ class BashDb():
             self.__parseOutput(self.__getOutput())
     
     def readSourceCode(self):
-        return [line.replace('\r', '') for line in open(self.script).readlines()]
+        return [line.replace('\r', '') for line in open(self.curSourceFile).readlines()]
     
     def getCurCodeLine(self):
         return self.curCodeLine
@@ -109,11 +108,18 @@ if __name__ == '__main__':
     db = BashDb('./test.sh')
     db.step() 
     db.step() 
+    db.step()
     db.step() 
-    db.addVarToWatch("var1")
-    db.addVarToWatch("var2")
-    db.__updateWatchList()
-    print db.getWatchList()
+    db.step() 
+    db.step()
+    db.step() 
+    db.step() 
+    db.step()
+
+    #db.addVarToWatch("var1")
+    #db.addVarToWatch("var2")
+    #db.__updateWatchList()
+    #print db.getWatchList()
   #  db.step()
   #  db.step()
   #  db.step()
