@@ -2,6 +2,7 @@
 
 import pexpect
 import re
+
 class BashDb():
     def __init__(self, scriptname):
     
@@ -10,6 +11,9 @@ class BashDb():
         self.curCodeLine = None
         self.prevCmd = None
         
+        self.breakList = {}
+        self.watchList = {}
+
         self.script = scriptname
         self.child = pexpect.spawn('bashdb -q ' + self.script)
         self.child.expect('bashdb<.*>')
@@ -32,11 +36,12 @@ class BashDb():
             else:
                 self.appOut += line + '\n'
     
-    def __cmd(self, command):
+    def __cmd(self, command, parseOutput = True):
         self.prevCmd = command
         self.child.send(command + '\n')
         self.child.expect('bashdb<.*>')
-        self.__parseOutput(self.__getOutput())
+        if parseOutput:
+            self.__parseOutput(self.__getOutput())
     
     def readSourceCode(self):
         return [line.replace('\r', '') for line in open(self.script).readlines()]
@@ -49,6 +54,41 @@ class BashDb():
 
     def getCurSrcFile(self):
         return self.curSourceFile
+
+    def getWatchList(self):
+        self.__updateWatchList()
+        return [var+' ='+val for var, val in self.watchList.iteritems()]
+    
+    def addVarToWatch(self, var):
+        if var not in self.watchList.keys():
+            self.watchList[var] = None
+    
+    def remVarFromWatch(self, var):
+        try:
+            del self.watchList[var]
+        except KeyError:
+            pass
+
+    def __updateWatchList(self):
+        cmd = 'print "'
+        delim = '<var_delim>'
+        for key in self.watchList:
+            cmd +=  delim + ' ' + '$' + key
+        cmd += '"'
+        self.__cmd(cmd, parseOutput = False) 
+        
+        vals = self.__getOutput()[1].split("<var_delim>")[1:]
+        
+        for key, val in zip(self.watchList.keys(), vals):
+            self.watchList[key] = val
+
+    def br(self, lineNr):
+        if lineNr not in self.breakList or self.breakList[lineNr] == False:
+            self.breakList[lineNr] = True
+            self.__cmd('br ' + str(lineNr + 1), parseOutput = False)
+        else:
+            self.breakList[lineNr] = False
+            self.__cmd('clear ' + str(lineNr + 1), parseOutput = False)
 
     def step(self):
         self.__cmd('step')
@@ -67,14 +107,21 @@ class BashDb():
     
 if __name__ == '__main__':
     db = BashDb('./test.sh')
-    db.step()
-    db.step()
-    db.step()
-   # db.restart()
-    db.step()
-    db.step()
-    db.step()
-    db.step()
-    #db.quit()
+    db.step() 
+    db.step() 
+    db.step() 
+    db.addVarToWatch("var1")
+    db.addVarToWatch("var2")
+    db.__updateWatchList()
+    print db.getWatchList()
+  #  db.step()
+  #  db.step()
+  #  db.step()
+  #  db.restart()
+  #  db.step()
+  #  db.step()
+  #  db.step()
+  #  db.step()
+  #  db.quit()
 
 
