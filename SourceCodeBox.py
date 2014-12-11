@@ -3,25 +3,26 @@
 from Tkinter import *
 import tkFont
 
+
 class SourceCodeBox(Frame):
     def __init__(self, *args, **kwargs):
         Frame.__init__(self, *args, **kwargs)
         
-        self.pack(expand = 1, fill = BOTH)
+        self.pack(expand=1, fill=BOTH)
         
         self.prev_pos = 0
         
         self.brSelectCb = None
 
-        self.Vsb = Scrollbar(self, orient="vertical", command=self.onVsb)
-        self.Vsb.pack(side = RIGHT, fill = Y)       
+        self.Vsb = Scrollbar(self, orient=VERTICAL, command=self.onVsb)
+        self.Vsb.pack(side=RIGHT, fill=Y)
         
-        self.code = Listbox(self, yscrollcommand=self.Vsb.set, exportselection = False,selectbackground = 'PaleGreen1')
-        self.brPtr = Listbox(self, width = 2, relief = RAISED, bg = 'gray', selectbackground = 'red', 
-                             selectmode = MULTIPLE, yscrollcommand = self.Vsb.set)
+        self.code = Listbox(self, yscrollcommand=self.Vsb.set, exportselection=False, selectbackground='PaleGreen1')
+        self.brPtr = Listbox(self, width = 2, relief=RAISED, bg='gray', selectbackground='red',
+                             selectmode=MULTIPLE, yscrollcommand=self.Vsb.set)
         
-        self.brPtr.pack(side = LEFT, fill = Y)
-        self.code.pack(side = LEFT, fill = BOTH, expand = 1)
+        self.brPtr.pack(side=LEFT, fill=Y)
+        self.code.pack(side=LEFT, fill=BOTH, expand=1)
         
         self.code.bind("<Button-4>", self.onMouseWheel)
         self.brPtr.bind("<Button-4>", self.onMouseWheel)
@@ -35,8 +36,8 @@ class SourceCodeBox(Frame):
         self.brPtr.bind("<Button-1>", self.onItemClick)
     
     def setFont(self, userFont):
-        self.code.config(font = userFont)
-        self.brPtr.config(font = userFont)
+        self.code.config(font=userFont)
+        self.brPtr.config(font=userFont)
     
     def setBrCb(self, func):
         self.brSelectCb = func
@@ -83,6 +84,3 @@ if __name__ == "__main__":
     tk = Tk()
     codeBox = SourceCodeBox(tk)
     tk.mainloop()
-
-
-

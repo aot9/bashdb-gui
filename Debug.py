@@ -3,8 +3,9 @@
 import pexpect
 import re
 
+
 class BashDb():
-    def __init__(self, scriptname):
+    def __init__(self, args):
     
         self.appOut = None
         self.curCodeLine = None
@@ -13,9 +14,9 @@ class BashDb():
         self.breakList = {}
         self.watchList = {}
         
-        self.curSourceFile = scriptname
+        self.curSourceFile = args[0]
 
-        self.child = pexpect.spawn('bashdb -q ' + scriptname)
+        self.child = pexpect.spawn('bashdb -q ' + args)
         self.child.expect('bashdb<.*>')
 
         self.__parseOutput(self.__getOutput())
@@ -36,7 +37,7 @@ class BashDb():
             else:
                 self.appOut += line + '\n'
     
-    def __cmd(self, command, parseOutput = True):
+    def __cmd(self, command, parseOutput=True):
         self.prevCmd = command
         self.child.send(command + '\n')
         self.child.expect('bashdb<.*>')
@@ -73,9 +74,9 @@ class BashDb():
         cmd = 'print "'
         delim = '<var_delim>'
         for key in self.watchList:
-            cmd +=  delim + ' ' + '$' + key
+            cmd += delim + ' ' + '$' + key
         cmd += '"'
-        self.__cmd(cmd, parseOutput = False) 
+        self.__cmd(cmd, parseOutput=False)
         
         vals = self.__getOutput()[1].split("<var_delim>")[1:]
         
@@ -83,12 +84,12 @@ class BashDb():
             self.watchList[key] = val
 
     def br(self, lineNr):
-        if lineNr not in self.breakList or self.breakList[lineNr] == False:
+        if lineNr not in self.breakList or not self.breakList[lineNr]:
             self.breakList[lineNr] = True
-            self.__cmd('br ' + str(lineNr + 1), parseOutput = False)
+            self.__cmd('br ' + str(lineNr + 1), parseOutput=False)
         else:
             self.breakList[lineNr] = False
-            self.__cmd('clear ' + str(lineNr + 1), parseOutput = False)
+            self.__cmd('clear ' + str(lineNr + 1), parseOutput=False)
 
     def step(self):
         self.__cmd('step')
